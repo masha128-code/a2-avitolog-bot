@@ -1,7 +1,6 @@
 import os
 import logging
 import requests
-import base64
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
@@ -9,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 TELEGRAM_TOKEN = "8886055011:AAF1oZXvAJr9LOqSOCzfajzy3-broJ3b1XQ"
-GIGACHAT_AUTH_KEY = "MDE5ZWY0MDAtZDMxNy03MDU3LWE0NDAtOWJlZTA4MzBhMzRkOmQzZDEwYTBlLTVlNjUtNGUzZi05YjZjLTE1MDgxZTBjMjZiMg=="
+GROQ_API_KEY = "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"
 
 SYSTEM_PROMPT = """Ты — карманный авитолог маркетингового агентства А2. Помогаешь менеджерам по продажам и партнёрам агентства проводить анализ ниши, делать аудит аккаунта, готовить КП и брифовать клиентов.
 
@@ -89,30 +88,18 @@ SYSTEM_PROMPT = """Ты — карманный авитолог маркетин
 
 user_histories = {}
 
-def get_gigachat_token():
-    url = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
+def ask_groq(messages):
+    url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
-        "Authorization": f"Basic {GIGACHAT_AUTH_KEY}",
-        "RqUID": "a2-avitolog-001",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    data = {"scope": "GIGACHAT_API_PERS"}
-    response = requests.post(url, headers=headers, data=data, verify=False)
-    return response.json().get("access_token")
-
-def ask_gigachat(messages):
-    token = get_gigachat_token()
-    url = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {token}",
+        "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "GigaChat",
+        "model": "llama3-8b-8192",
         "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + messages,
         "max_tokens": 1500
     }
-    response = requests.post(url, headers=headers, json=payload, verify=False)
+    response = requests.post(url, headers=headers, json=payload)
     return response.json()["choices"][0]["message"]["content"]
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -141,7 +128,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
 
     try:
-        reply = ask_gigachat(user_histories[user_id])
+        reply = ask_groq(user_histories[user_id])
         user_histories[user_id].append({"role": "assistant", "content": reply})
         if len(user_histories[user_id]) > 20:
             user_histories[user_id] = user_histories[user_id][-20:]

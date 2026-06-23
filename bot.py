@@ -8,8 +8,8 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-GIGACHAT_AUTH_KEY = os.getenv("GIGACHAT_AUTH_KEY")
+TELEGRAM_TOKEN = "8886055011:AAF1oZXvAJr9LOqSOCzfajzy3-broJ3b1XQ"
+GIGACHAT_AUTH_KEY = "MDE5ZWY0MDAtZDMxNy03MDU3LWE0NDAtOWJlZTA4MzBhMzRkOmQzZDEwYTBlLTVlNjUtNGUzZi05YjZjLTE1MDgxZTBjMjZiMg=="
 
 SYSTEM_PROMPT = """Ты — карманный авитолог маркетингового агентства А2. Помогаешь менеджерам по продажам и партнёрам агентства проводить анализ ниши, делать аудит аккаунта, готовить КП и брифовать клиентов.
 
